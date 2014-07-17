@@ -2,16 +2,20 @@
 
 set -e
 
-git clone https://github.com/sstephenson/rbenv.git /app/.rbenv
+apt-get update
+LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -f -y
+
+[ -d /usr/local/rbenv ] || git clone https://github.com/sstephenson/rbenv.git /usr/local/rbenv
 
 mkdir -p /app/.profile.d
-echo 'export PATH="/app/.rbenv/bin:$PATH"' >> /app/.profile.d/rbenv
+echo 'export RBENV_ROOT="/usr/local/rbenv"' >> /app/.profile.d/rbenv
+echo 'export PATH="$RBENV_ROOT/bin:$PATH"' >> /app/.profile.d/rbenv
 echo 'eval "$(rbenv init -)"' >> /app/.profile.d/rbenv
 . /app/.profile.d/rbenv
 
-git clone https://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
+[ -d /usr/local/rbenv/plugins/ruby-build ] || git clone https://github.com/sstephenson/ruby-build.git /usr/local/rbenv/plugins/ruby-build
 
-apt-get install autoconf bison build-essential libssl-dev zlib1g zlib1g-dev
+LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install autoconf bison build-essential libssl-dev zlib1g zlib1g-dev -f -y
 
 [ -f /app/.ruby-version ] && rbenv install $(cat /app/.ruby-version)
 
@@ -19,7 +23,6 @@ ruby_version=$(grep -e '^ruby ' | sed -e 's/^ruby //') || true
 [ -z $ruby_version ] || rbenv install $ruby_version
 
 [ -f /app/Gemfile ] && bash -c "
-  set -x
   . /app/.profile.d/rbenv
   rbenv rehash
   which ruby
@@ -32,4 +35,7 @@ ruby_version=$(grep -e '^ruby ' | sed -e 's/^ruby //') || true
   bundle --version
   bundle install
 " || true
+
+mkdir -p /usr/local/rbenv/.profile.d
+[ -f /usr/local/rbenv/.profile.d/rbenv] || cp -f /app/.profile.d/rbenv /usr/local/rbenv/.profile.d/rbenv
 
