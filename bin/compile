@@ -12,7 +12,7 @@ type rbenv
 
 git clone https://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
 
-apt-get install autoconf bison build-essential libssl-dev libreadline-dev zlib1g zlib1g-dev
+apt-get install autoconf bison build-essential libssl-dev zlib1g zlib1g-dev
 
 [ -f /app/.ruby-version ] && rbenv install $(cat /app/.ruby-version)
 
