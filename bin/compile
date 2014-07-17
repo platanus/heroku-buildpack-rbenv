@@ -2,6 +2,8 @@
 
 set -ex
 
+echo args: $*
+
 [ -n $BUILD_DIR ] || BUILD_DIR=$1 # The app directory, usually /app
 [ -n $CACHE_DIR ] || CACHE_DIR=$2 # The contents of CACHE_DIR will be persisted between builds. 
 [ -n $ENV_DIR ] || ENV_DIR=$3     # An envdir directory of the app's environment variables
