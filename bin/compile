@@ -19,6 +19,8 @@ ruby_version=$(grep -e '^ruby ' | sed -e 's/^ruby //') || true
 [ -z $ruby_version ] || rbenv install $ruby_version
 
 [ -f /app/Gemfile ] && (
+  . /app/.profile.d/rbenv
+  rbenv rehash
   gem install bundler
   cd /app
   bundle install
