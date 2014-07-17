@@ -15,5 +15,6 @@ apt-get install autoconf bison build-essential libssl-dev zlib1g zlib1g-dev
 
 [ -f /app/.ruby-version ] && rbenv install $(cat /app/.ruby-version)
 
-ruby_version=`grep -e '^ruby '` && rbenv install $ruby_version
+ruby_version=$(grep -e '^ruby ' | sed -e 's/^ruby //') || true
+[ -z $ruby_version ] || rbenv install $ruby_version
 
