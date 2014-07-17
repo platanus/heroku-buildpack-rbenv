@@ -38,12 +38,12 @@ mkdir -p $RUBY_BUILD_BUILD_PATH
 [ -f /app/.ruby-version ] && rbenv install --keep $(cat $BUILD_DIR/.ruby-version)
 
 ruby_version=$(grep -e '^ruby ' $BUILD_DIR/Gemfile | sed -e 's/^ruby //' -e 's/"//g') || true
-[ -z $ruby_version ] || rbenv install --keep $ruby_version
+[ -z $ruby_version ] || rbenv install --keep $ruby_version || true
 
-[ -f /app/Gemfile ] && bash -c "
+[ -f $BUILD_DIR/Gemfile ] && bash -c "
   . $RBENV_PROFILE
   rbenv rehash
-  cd /app
+  cd $BUILD_DIR
   which ruby
   ruby --version
   which gem
