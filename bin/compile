@@ -37,7 +37,7 @@ mkdir -p $RUBY_BUILD_BUILD_PATH
 
 [ -f /app/.ruby-version ] && rbenv install --keep $(cat $BUILD_DIR/.ruby-version)
 
-ruby_version=$(grep -e '^ruby ' $BUILD_DIR/Gemfile | sed -e 's/^ruby //') || true
+ruby_version=$(grep -e '^ruby ' $BUILD_DIR/Gemfile | sed -e 's/^ruby //' -e 's/"//g') || true
 [ -z $ruby_version ] || rbenv install --keep $ruby_version
 
 [ -f /app/Gemfile ] && bash -c "
