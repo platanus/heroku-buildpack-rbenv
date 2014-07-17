@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+set -ex
+
+git clone https://github.com/sstephenson/rbenv.git /app/.rbenv
+echo 'export PATH="/app/.rbenv/bin:$PATH"' >> /app/.profile.d/rbenv
+echo 'eval "$(rbenv init -)"' >> /app/.profile.d/rbenv
+. /app/.profile.d/rbenv
+type rbenv
+
+git clone https://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
+
+apt-get install autoconf bison build-essential libssl-dev libyaml-dev libreadline6 libreadline6-dev zlib1g zlib1g-dev
+
+[ -f /app/.ruby-version ] && rbenv install $(cat /app/.ruby-version)
+
+ruby_version=`grep -e '^ruby '` && rbenv install $ruby_version
+
