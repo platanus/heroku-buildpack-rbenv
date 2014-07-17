@@ -2,12 +2,9 @@
 
 set -ex
 
-if curl http://169.254.169.254/latest/meta-data/placement/availability-zone -s ; then
-  availability_zone=$(curl http://169.254.169.254/latest/meta-data/placement/availability-zone -s | sed -e 's/.$//')
-  perl -pi -e "s%archive.ubuntu.com/ubuntu%${availability_zone}.ec2.archive.ubuntu.com/ubuntu%g" /etc/apt/sources.list
-  apt-get update
-  LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -f -y
-fi
+perl -pi -e "s%archive.ubuntu.com/ubuntu%old-releases.ubuntu.com/ubuntu%g" /etc/apt/sources.list
+apt-get update
+LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -f -y
 
 [ -d /usr/local/rbenv ] || git clone https://github.com/sstephenson/rbenv.git /usr/local/rbenv
 
