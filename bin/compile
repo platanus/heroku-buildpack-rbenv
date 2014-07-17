@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -ex
 
 if curl http://169.254.169.254/latest/meta-data/placement/availability-zone -s ; then
   availability_zone=$(curl http://169.254.169.254/latest/meta-data/placement/availability-zone -s | sed -e 's/.$//')
