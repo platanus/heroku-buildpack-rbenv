@@ -8,7 +8,6 @@ mkdir -p /app/.profile.d
 echo 'export PATH="/app/.rbenv/bin:$PATH"' >> /app/.profile.d/rbenv
 echo 'eval "$(rbenv init -)"' >> /app/.profile.d/rbenv
 . /app/.profile.d/rbenv
-type rbenv
 
 git clone https://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
 
