@@ -19,7 +19,8 @@ RBENV_ROOT=$BUILD_DIR/.rbenv
 
 RBENV_PROFILE=$BUILD_DIR/.profile.d/rbenv
 mkdir -p $BUILD_DIR/.profile.d
-echo export RBENV_ROOT=\"$RBENV_ROOT\" >> $RBENV_PROFILE
+echo 'export APP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.."' >> $RBENV_PROFILE
+echo 'export RBENV_ROOT="$APP_DIR/.rbenv"' >> $RBENV_PROFILE
 echo 'export PATH="$RBENV_ROOT/bin:$PATH"' >> $RBENV_PROFILE
 echo 'eval "$(rbenv init -)"' >> $RBENV_PROFILE
 
@@ -44,18 +45,9 @@ ruby_version=$(grep -e '^ruby ' $BUILD_DIR/Gemfile | sed -e 's/^ruby //' -e 's/"
   . $RBENV_PROFILE
   rbenv rehash
   cd $BUILD_DIR
-  which ruby
-  ruby --version
-  which gem
-  gem --version
-  gem install update_rubygems
+  gem install rubygems-update
   update_rubygems
-  which gem
-  gem --version
   gem install bundler
-  which bundle
-  bundle --version
-  bundle install
 " || true
 
 export PATH RBENV_ROOT
