@@ -1,42 +1,52 @@
 #!/usr/bin/env bash
 
+[ -n $BUILD_DIR ] || BUILD_DIR=$1 # The app directory, usually /app
+[ -n $CACHE_DIR ] || CACHE_DIR=$2 # The contents of CACHE_DIR will be persisted between builds. 
+[ -n $ENV_DIR ] || ENV_DIR=$3     # An envdir directory of the app's environment variables
+
 set -ex
 
 perl -pi -e "s%archive.ubuntu.com/ubuntu%old-releases.ubuntu.com/ubuntu%g" /etc/apt/sources.list
 apt-get update
 LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -f -y
 
-[ -d /usr/local/rbenv ] || git clone https://github.com/sstephenson/rbenv.git /usr/local/rbenv
+RBENV_ROOT=$BUILD_DIR/.rbenv
+[ -d /usr/local/rbenv ] || git clone https://github.com/sstephenson/rbenv.git $RBENV_ROOT
 
-mkdir -p /app/.profile.d
-echo 'export RBENV_ROOT="/usr/local/rbenv"' >> /app/.profile.d/rbenv
-echo 'export PATH="$RBENV_ROOT/bin:$PATH"' >> /app/.profile.d/rbenv
-echo 'eval "$(rbenv init -)"' >> /app/.profile.d/rbenv
-. /app/.profile.d/rbenv
+RBENV_PROFILE=$BUILD_DIR/.profile.d/rbenv
+mkdir -p $RBENV_PROFILE
+echo export RBENV_ROOT=\"$RBENV_ROOT\" >> $RBENV_PROFILE
+echo 'export PATH="$RBENV_ROOT/bin:$PATH"' >> $RBENV_PROFILE
+echo 'eval "$(rbenv init -)"' >> $RBENV_PROFILE
 
-[ -d /usr/local/rbenv/plugins/ruby-build ] || git clone https://github.com/sstephenson/ruby-build.git /usr/local/rbenv/plugins/ruby-build
+source $RBENV_PROFILE
+
+[ -d /usr/local/rbenv/plugins/ruby-build ] || git clone https://github.com/sstephenson/ruby-build.git $RBENV_ROOT/plugins/ruby-build
 
 LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install autoconf bison build-essential libssl-dev zlib1g zlib1g-dev -f -y
 
-[ -f /app/.ruby-version ] && rbenv install $(cat /app/.ruby-version)
+[ -f /app/.ruby-version ] && rbenv install $(cat $BUILD_DIR/.ruby-version)
 
-ruby_version=$(grep -e '^ruby ' | sed -e 's/^ruby //') || true
+ruby_version=$(grep -e '^ruby ' $BUILD_DIR/Gemfile | sed -e 's/^ruby //') || true
 [ -z $ruby_version ] || rbenv install $ruby_version
 
 [ -f /app/Gemfile ] && bash -c "
-  . /app/.profile.d/rbenv
+  . $RBENV_PROFILE
   rbenv rehash
+  cd /app
   which ruby
   ruby --version
   which gem
   gem --version
+  gem install update_rubygems
+  update_rubygems
+  which gem
+  gem --version
   gem install bundler
-  cd /app
   which bundle
   bundle --version
   bundle install
 " || true
 
-mkdir -p /usr/local/rbenv/.profile.d
-[ -f /usr/local/rbenv/.profile.d/rbenv] || cp -f /app/.profile.d/rbenv /usr/local/rbenv/.profile.d/rbenv
+export PATH RBENV_ROOT
 
