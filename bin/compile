@@ -18,7 +18,7 @@ apt-get install autoconf bison build-essential libssl-dev zlib1g zlib1g-dev
 ruby_version=$(grep -e '^ruby ' | sed -e 's/^ruby //') || true
 [ -z $ruby_version ] || rbenv install $ruby_version
 
-[ -f /app/Gemfile ] && su -lm app -c bash -c "
+[ -f /app/Gemfile ] && bash -c "
   set -x
   . /app/.profile.d/rbenv
   rbenv rehash
@@ -31,5 +31,5 @@ ruby_version=$(grep -e '^ruby ' | sed -e 's/^ruby //') || true
   which bundle
   bundle --version
   bundle install
-"
+" || true
 
