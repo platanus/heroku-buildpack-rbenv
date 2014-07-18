@@ -41,14 +41,14 @@ echo 'eval "$(rbenv init -)"' >> $RBENV_PROFILE
 
 source $RBENV_PROFILE
 
-ruby_version_from_dotfile="$([ -f $BUILD_DIR/.ruby-version ] && cat $BUILD_DIR/.ruby-version)"
-ruby_version_from_gemfile="$(grep -e '^ruby ' $BUILD_DIR/Gemfile | sed -e 's/^ruby //' -e 's/"//g')" || true
+ruby_version_from_dotfile=$( ( [ -f $BUILD_DIR/.ruby-version ] && cat $BUILD_DIR/.ruby-version ) || true )
+ruby_version_from_gemfile=$( grep -e '^ruby ' $BUILD_DIR/Gemfile | sed -e 's/^ruby //' -e 's/"//g' || true)
 
-for ruby_version in $ruby_version_from_dotfile $ruby_version_from_gemfile ; do
+for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; do
 
   # Generate the ruby version if it doesn't exist yet in the cache
   [ -n $REBUILD_RUBY ] ||
-  [ -d $RBENV_ROOT/versions/$ruby_version ] || (
+  [ -d $RBENV_ROOT/versions/${ruby_version} ] || (
 
     grep old-releases /etc/apt/sources.list >/dev/null 2>&1 || (
       perl -pi -e "s%archive.ubuntu.com/ubuntu%old-releases.ubuntu.com/ubuntu%g" /etc/apt/sources.list
@@ -65,7 +65,7 @@ for ruby_version in $ruby_version_from_dotfile $ruby_version_from_gemfile ; do
     RUBY_BUILD_BUILD_PATH=$CACHE_DIR/ruby-build.sources
     mkdir -p $RUBY_BUILD_BUILD_PATH
 
-    rbenv install --keep $ruby_version
+    rbenv install --keep ${ruby_version}
 
     bash -c "
       source $RBENV_PROFILE
@@ -81,7 +81,7 @@ for ruby_version in $ruby_version_from_dotfile $ruby_version_from_gemfile ; do
     "
 
     # Make a backup copy in the cache for this ruby version for next time
-    cp -a $RBENV_ROOT/versions/$ruby_version $CACHED_RBENV/versions/$ruby_version
+    cp -a $RBENV_ROOT/versions/$ruby_version $CACHED_RBENV/versions/${ruby_version}
   )
 
 done
