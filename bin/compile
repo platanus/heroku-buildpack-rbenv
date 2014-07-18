@@ -12,7 +12,7 @@ APP_DIR=/app
 mkdir -p $APP_DIR
 
 [ "$BUILD_DIR" = "$APP_DIR" ] || (
-  tar cf - -C $BUILD_DIR | tar xf - -C $APP_DIR
+  tar cf - . -C $BUILD_DIR | tar xf - -C $APP_DIR
 )
 
 RBENV_ROOT=$APP_DIR/.rbenv
