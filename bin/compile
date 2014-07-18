@@ -9,6 +9,8 @@ ENV_DIR=$3     # An envdir directory of the app's environment variables
 RBENV_ROOT=$BUILD_DIR/.rbenv
 CACHED_RBENV=$CACHE_DIR/rbenv
 
+[ -n $REMOVE_RBENV_CACHE ] && [ -d $CACHED_RBENV ] && rm -fr $CACHED_RBENV
+
 # Restore any cached rbenv
 [ -d $CACHED_RBENV ] && (
   # Refresh any cached version first if we can
