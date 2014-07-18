@@ -47,7 +47,7 @@ ruby_version_from_gemfile=$( grep -e '^ruby ' $BUILD_DIR/Gemfile | sed -e 's/^ru
 for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; do
 
   # Generate the ruby version if it doesn't exist yet in the cache
-  [ -n $REBUILD_RUBY ] ||
+  [ -n $REBUILD_RUBY ] || \
   [ -d $RBENV_ROOT/versions/${ruby_version} ] || (
 
     grep old-releases /etc/apt/sources.list >/dev/null 2>&1 || (
