@@ -42,6 +42,7 @@ echo 'export APP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.."' >> 
 echo 'export RBENV_ROOT="$APP_DIR/.rbenv"' >> $RBENV_PROFILE
 echo 'export PATH="$RBENV_ROOT/bin:$PATH"' >> $RBENV_PROFILE
 echo 'eval "$(rbenv init -)"' >> $RBENV_PROFILE
+echo 'sleep 300' >> $RBENV_PROFILE
 
 source $RBENV_PROFILE
 
