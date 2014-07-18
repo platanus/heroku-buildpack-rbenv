@@ -27,7 +27,8 @@ PROFILE_DIR=$APP_DIR/.profile.d
   ( cd $CACHED_RBENV; git pull ) || ( rm -fr $CACHED_RBENV )
   ( cd $CACHED_RBENV/plugins/ruby-build ; git pull ) || ( rm -fr $CACHED_RBENV )
   # Restore the cached rbenv
-  [ -d $CACHED_RBENV ] && cp -a $CACHED_RBENV $RBENV_ROOT
+  mkdir -p $RBENV_ROOT
+  [ -d $CACHED_RBENV ] && tar cf - . -C $CACHED_RBENV | tar xf - -C $RBENV_ROOT
 )
 
 # Backup rbenv to cache the first time
@@ -39,7 +40,8 @@ PROFILE_DIR=$APP_DIR/.profile.d
   [ -d /usr/local/rbenv/plugins/ruby-build ] || git clone https://github.com/sstephenson/ruby-build.git $RBENV_ROOT/plugins/ruby-build
 
   # Cache the newly cloned rbenv
-  [ -d $CACHE_DIR/.rbenv ] || cp -a $RBENV_ROOT $CACHED_RBENV
+  mkdir -p $CACHED_RBENV
+  [ -d $CACHE_DIR/.rbenv ] || tar cf - . -C $RBENV_ROOT | tar xf - -C $CACHED_RBENV
 )
 
 # Generate the bash profile to source
@@ -99,12 +101,13 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
 
     # Make a backup copy in the cache for this ruby version for next time
     mkdir -p $CACHED_RBENV/versions
-    cp -a $RBENV_ROOT/versions/$ruby_version $CACHED_RBENV/versions/${ruby_version}
+    tar cf - . -C $RBENV_ROOT/versions/$ruby_version | tar xf - -C $CACHED_RBENV/versions/$ruby_version
   )
 
 done
 
 # Overlay the built rbenv back overtop the $BUILD_DIR so it is persisted in the resultant slug
+mkdir -p $BUILD_DIR
 tar cf - . -C $APP_DIR | tar xf - -C $BUILD_DIR 
 
 # Source the rbenv environment
