@@ -80,6 +80,7 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
     "
 
     # Make a backup copy in the cache for this ruby version for next time
+    mkdir -p $CACHED_RBENV/versions
     cp -a $RBENV_ROOT/versions/$ruby_version $CACHED_RBENV/versions/${ruby_version}
   )
 
