@@ -21,27 +21,32 @@ PROFILE_DIR=$APP_DIR/.profile.d
 # If REMOVE_RBENV_CACHE is set, clean up the cache
 [ -n "$REMOVE_RBENV_CACHE" ] && [ -d $CACHED_RBENV ] && rm -fr $CACHED_RBENV
 
+# Update any cached rbenv, remove the cache if there is an error
+[ -d $CACHED_RBENV/.git ] || rm -fr $CACHED_RBENV
+[ -d $CACHED_RBENV/.git ] && (
+  ( cd $CACHED_RBENV; git pull ) || ( rm -fr $CACHED_RBENV )
+  git clone https://github.com/sstephenson/rbenv.git $RBENV_ROOT
+  [ -d $CACHED_RBENV/plugins/ruby-build/.git ] && (
+    ( cd $CACHED_RBENV/plugins/ruby-build && git pull ) || rm -fr $CACHED_RBENV
+  )
+)
+
 # Restore any cached rbenv
 [ -d $CACHED_RBENV ] && (
-  # Refresh any cached version first if we can
-  ( cd $CACHED_RBENV; git pull ) || ( rm -fr $CACHED_RBENV )
-  ( cd $CACHED_RBENV/plugins/ruby-build ; git pull ) || ( rm -fr $CACHED_RBENV )
-  # Restore the cached rbenv
-  mkdir -p $RBENV_ROOT
-  [ -d $CACHED_RBENV ] && cp -fa $CACHED_RBENV $RBENV_ROOT
+  # Restore a cached rbenv
+  cp -fa $CACHED_RBENV $RBENV_ROOT
 )
 
 # Backup rbenv to cache the first time
 [ -d $CACHED_RBENV ] || (
   # Initial clone of rbenv
-  git clone https://github.com/sstephenson/rbenv.git $RBENV_ROOT
+  [ -d $RBENV_ROOT ] || git clone https://github.com/sstephenson/rbenv.git $RBENV_ROOT
 
   # Initial clone of ruby-build
-  [ -d /usr/local/rbenv/plugins/ruby-build ] || git clone https://github.com/sstephenson/ruby-build.git $RBENV_ROOT/plugins/ruby-build
+  [ -d $RBENV_ROOT/plugins/ruby-build ] || git clone https://github.com/sstephenson/ruby-build.git $RBENV_ROOT/plugins/ruby-build
 
   # Cache the newly cloned rbenv
-  mkdir -p $CACHED_RBENV
-  [ -d $CACHE_DIR/.rbenv ] || cp -fa $RBENV_ROOT $CACHED_RBENV
+  cp -fa $RBENV_ROOT $CACHED_RBENV
 )
 
 # Generate the bash profile to source
