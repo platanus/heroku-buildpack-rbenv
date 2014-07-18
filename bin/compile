@@ -12,10 +12,10 @@ CACHED_RBENV=$CACHE_DIR/rbenv
 # Restore any cached rbenv
 [ -d $CACHED_RBENV ] && (
   # Refresh any cached version first if we can
-  ( cd $RBENV_ROOT ; git pull ) || true
-  ( cd $RBENV_ROOT/plugins/ruby-build ; git pull ) || true
+  ( cd $CACHED_RBENV; git pull ) || ( rm -fr $CACHED_RBENV )
+  ( cd $CACHED_RBENV/plugins/ruby-build ; git pull ) || ( rm -fr $CACHED_RBENV )
   # Restore the cached rbenv
-  cp -a $CACHE_DIR/rbenv $RBENV_ROOT
+  [ -d $CACHED_RBENV ] && cp -a $CACHED_RBENV $RBENV_ROOT
 )
 
 # Backup rbenv to cache the first time
