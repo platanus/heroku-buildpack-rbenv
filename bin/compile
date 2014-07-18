@@ -93,6 +93,7 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
 
       # Ensure rubygems is updated to the latest
       gem install rubygems-update
+      rbenv rehash
       update_rubygems || true
 
       # Install Bundler
