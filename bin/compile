@@ -18,17 +18,6 @@ CACHED_RBENV=$CACHE_DIR/rbenv
   cp -a $CACHE_DIR/rbenv $RBENV_ROOT
 )
 
-# Generate the bash profile to source
-RBENV_PROFILE=$BUILD_DIR/.profile.d/rbenv
-mkdir -p $BUILD_DIR/.profile.d
-echo 'set -x' >> $RBENV_PROFILE
-echo 'export APP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.."' >> $RBENV_PROFILE
-echo 'export RBENV_ROOT="$APP_DIR/.rbenv"' >> $RBENV_PROFILE
-echo 'export PATH="$RBENV_ROOT/bin:$PATH"' >> $RBENV_PROFILE
-echo 'eval "$(rbenv init -)"' >> $RBENV_PROFILE
-
-source $RBENV_PROFILE
-
 # Backup rbenv to cache the first time
 [ -d $CACHED_RBENV ] || (
   # Initial clone of rbenv
@@ -40,6 +29,18 @@ source $RBENV_PROFILE
   # Cache the newly cloned rbenv
   [ -d $CACHE_DIR/.rbenv ] || cp -a $RBENV_ROOT $CACHED_RBENV
 ]
+
+# Generate the bash profile to source
+RBENV_PROFILE=$BUILD_DIR/.profile.d/rbenv
+mkdir -p $BUILD_DIR/.profile.d
+echo 'set -x' >> $RBENV_PROFILE
+echo 'export APP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.."' >> $RBENV_PROFILE
+echo 'export RBENV_ROOT="$APP_DIR/.rbenv"' >> $RBENV_PROFILE
+echo 'export PATH="$RBENV_ROOT/bin:$PATH"' >> $RBENV_PROFILE
+echo 'eval "$(rbenv init -)"' >> $RBENV_PROFILE
+
+source $RBENV_PROFILE
+
 
 ruby_version_from_dotfile="$([ -f $BUILD_DIR/.ruby-version ] && cat $BUILD_DIR/.ruby-version)"
 ruby_version_from_gemfile="$(grep -e '^ruby ' $BUILD_DIR/Gemfile | sed -e 's/^ruby //' -e 's/"//g')" || true
