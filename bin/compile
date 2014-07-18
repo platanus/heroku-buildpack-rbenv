@@ -75,8 +75,6 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
       perl -pi -e "s%archive.ubuntu.com/ubuntu%old-releases.ubuntu.com/ubuntu%g" /etc/apt/sources.list
       APT_CACHE_PATH=$CACHE_DIR/apt
       mkdir -p $APT_CACHE_PATH
-      apt-get -o dir::cache::archives=$APT_CACHE_PATH update
-      LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get -o dir::cache::archives=$APT_CACHE_PATH dist-upgrade -f -y
       LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get -o dir::cache::archives=$APT_CACHE_PATH install autoconf bison build-essential libssl-dev zlib1g zlib1g-dev -f -y
     )
 
