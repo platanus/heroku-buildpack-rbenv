@@ -6,19 +6,22 @@ BUILD_DIR=$1 # The app directory, usually /app
 CACHE_DIR=$2 # The contents of CACHE_DIR will be persisted between builds. 
 ENV_DIR=$3     # An envdir directory of the app's environment variables
 
-perl -pi -e "s%archive.ubuntu.com/ubuntu%old-releases.ubuntu.com/ubuntu%g" /etc/apt/sources.list
-
-APT_CACHE_PATH=$CACHE_DIR/apt
-mkdir -p $APT_CACHE_PATH
-
-apt-get -o dir::cache::archives=$APT_CACHE_PATH update
-LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get -o dir::cache::archives=$APT_CACHE_PATH dist-upgrade -f -y
-
 RBENV_ROOT=$BUILD_DIR/.rbenv
-[ -d /usr/local/rbenv ] || git clone https://github.com/sstephenson/rbenv.git $RBENV_ROOT
+CACHED_RBENV=$CACHE_DIR/rbenv
 
+# Restore any cached rbenv
+[ -d $CACHED_RBENV ] && (
+  # Refresh any cached version first if we can
+  ( cd $RBENV_ROOT ; git pull ) || true
+  ( cd $RBENV_ROOT/plugins/ruby-build ; git pull ) || true
+  # Restore the cached rbenv
+  cp -a $CACHE_DIR/rbenv $RBENV_ROOT
+)
+
+# Generate the bash profile to source
 RBENV_PROFILE=$BUILD_DIR/.profile.d/rbenv
 mkdir -p $BUILD_DIR/.profile.d
+echo 'set -x' >> $RBENV_PROFILE
 echo 'export APP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.."' >> $RBENV_PROFILE
 echo 'export RBENV_ROOT="$APP_DIR/.rbenv"' >> $RBENV_PROFILE
 echo 'export PATH="$RBENV_ROOT/bin:$PATH"' >> $RBENV_PROFILE
@@ -26,29 +29,64 @@ echo 'eval "$(rbenv init -)"' >> $RBENV_PROFILE
 
 source $RBENV_PROFILE
 
-[ -d /usr/local/rbenv/plugins/ruby-build ] || git clone https://github.com/sstephenson/ruby-build.git $RBENV_ROOT/plugins/ruby-build
+# Backup rbenv to cache the first time
+[ -d $CACHED_RBENV ] || (
+  # Initial clone of rbenv
+  git clone https://github.com/sstephenson/rbenv.git $RBENV_ROOT
 
-LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get -o dir::cache::archives=$APT_CACHE_PATH install autoconf bison build-essential libssl-dev zlib1g zlib1g-dev -f -y
+  # Initial clone of ruby-build
+  [ -d /usr/local/rbenv/plugins/ruby-build ] || git clone https://github.com/sstephenson/ruby-build.git $RBENV_ROOT/plugins/ruby-build
 
-RUBY_BUILD_CACHE_PATH=$CACHE_DIR/ruby-build.cache
-mkdir -p $RUBY_BUILD_CACHE_PATH
+  # Cache the newly cloned rbenv
+  [ -d $CACHE_DIR/.rbenv ] || cp -a $RBENV_ROOT $CACHED_RBENV
+]
 
-RUBY_BUILD_BUILD_PATH=$CACHE_DIR/ruby-build.sources
-mkdir -p $RUBY_BUILD_BUILD_PATH
+ruby_version_from_dotfile="$([ -f $BUILD_DIR/.ruby-version ] && cat $BUILD_DIR/.ruby-version)"
+ruby_version_from_gemfile="$(grep -e '^ruby ' $BUILD_DIR/Gemfile | sed -e 's/^ruby //' -e 's/"//g')" || true
+ruby_versions="$(echo $ruby_version_from_dotfile $ruby_version_from_gemfile | sed -e 's/ //g')"
 
-[ -f /app/.ruby-version ] && rbenv install --keep $(cat $BUILD_DIR/.ruby-version)
+for ruby_version in $ruby_versions ; do
 
-ruby_version=$(grep -e '^ruby ' $BUILD_DIR/Gemfile | sed -e 's/^ruby //' -e 's/"//g') || true
-[ -z $ruby_version ] || rbenv install --keep $ruby_version || true
+  # Generate the ruby version if it doesn't exist yet in the cache
+  [ -n $REBUILD_RUBY ] ||
+  [ -d $RBENV_ROOT/versions/$ruby_version ] || (
 
-[ -f $BUILD_DIR/Gemfile ] && bash -c "
-  . $RBENV_PROFILE
-  rbenv rehash
-  cd $BUILD_DIR
-  gem install rubygems-update
-  update_rubygems
-  gem install bundler
-" || true
+    grep old-releases /etc/apt/sources.list >/dev/null 2>&1 || (
+      perl -pi -e "s%archive.ubuntu.com/ubuntu%old-releases.ubuntu.com/ubuntu%g" /etc/apt/sources.list
+      APT_CACHE_PATH=$CACHE_DIR/apt
+      mkdir -p $APT_CACHE_PATH
+      apt-get -o dir::cache::archives=$APT_CACHE_PATH update
+      LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get -o dir::cache::archives=$APT_CACHE_PATH dist-upgrade -f -y
+      LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get -o dir::cache::archives=$APT_CACHE_PATH install autoconf bison build-essential libssl-dev zlib1g zlib1g-dev -f -y
+    )
 
+    RUBY_BUILD_CACHE_PATH=$CACHE_DIR/ruby-build.cache
+    mkdir -p $RUBY_BUILD_CACHE_PATH
+
+    RUBY_BUILD_BUILD_PATH=$CACHE_DIR/ruby-build.sources
+    mkdir -p $RUBY_BUILD_BUILD_PATH
+
+    rbenv install --keep $ruby_version
+
+    bash -c "
+      source $RBENV_PROFILE
+      rbenv rehash
+      cd $BUILD_DIR
+
+      # Ensure rubygems is updated to the latest
+      gem install rubygems-update
+      update_rubygems || true
+
+      # Install Bundler
+      gem install bundler
+    "
+
+    # Make a backup copy in the cache for this ruby version for next time
+    cp -a $RBENV_ROOT/versions/$ruby_version $CACHED_RBENV/versions/$ruby_version
+  )
+
+done
+
+rbenv rehash
+cd $BUILD_DIR
 export PATH RBENV_ROOT
-
