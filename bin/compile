@@ -107,7 +107,7 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
 done
 
 # Overlay the built rbenv back overtop the $BUILD_DIR so it is persisted in the resultant slug
-tar -cf - -C $APP_DIR | tar xf - -C $BUILD_DIR 
+tar -cf - . -C $APP_DIR | tar -xf - -C $BUILD_DIR 
 
 # Source the rbenv environment
 rbenv rehash
