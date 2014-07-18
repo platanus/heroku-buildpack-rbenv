@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-
+ 
 set -ex
 
 BUILD_DIR=$1 # The app directory, usually /app. This will have the app source initially. Whatever is left here will be persisted.
 CACHE_DIR=$2 # The contents of CACHE_DIR will be persisted between builds so we can use it to speed the builds up
 ENV_DIR=$3     # An envdir directory of the app's environment variables
 
-CACHED_RBENV=$CACHE_DIR/rbenv
+CACHED_RBENV_ROOT=$CACHE_DIR/rbenv
 
 APP_DIR=/app
 
@@ -16,42 +16,44 @@ APP_DIR=/app
 mkdir -p $APP_DIR
 
 RBENV_ROOT=$APP_DIR/.rbenv
+BUILD_RBENV_ROOT=$BUILD_DIR/.rbenv
 
 # If REMOVE_RBENV_CACHE is set, clean up the cache
-[ -n "$REMOVE_RBENV_CACHE" ] && [ -d $CACHED_RBENV ] && rm -fr $CACHED_RBENV
+[ -n "$REMOVE_RBENV_CACHE" ] && [ -d $CACHED_RBENV_ROOT ] && rm -fr $CACHED_RBENV_ROOT
 
 # Update any cached rbenv, remove the cache if there is an error
-[ -d $CACHED_RBENV/.git ] && (
-  ( cd $CACHED_RBENV; git pull ) || ( rm -fr $CACHED_RBENV )
+[ -d $CACHED_RBENV_ROOT/.git ] && (
+  ( cd $CACHED_RBENV_ROOT; git pull ) || ( rm -fr $CACHED_RBENV_ROOT )
 )
 
 # Clone a new rbenv if there isn't already one cached
-[ -d $CACHED_RBENV/.git ] || (
-  [ -d $CACHED_RBENV ] && rm -fr $CACHED_RBENV
-  [ -d $RBENV_ROOT ] || git clone https://github.com/sstephenson/rbenv.git $CACHED_RBENV
+[ -d $CACHED_RBENV_ROOT/.git ] || (
+  [ -d $CACHED_RBENV_ROOT ] && rm -fr $CACHED_RBENV_ROOT
+  [ -d $RBENV_ROOT ] || git clone https://github.com/sstephenson/rbenv.git $CACHED_RBENV_ROOT
 )
 
 # Update any cached ruby-build, remove the cache if there is an error
-[ -d $CACHED_RBENV/plugins/ruby-build/.git ] && (
-  ( cd $CACHED_RBENV/plugins/ruby-build && git pull ) || rm -fr $CACHED_RBENV
+[ -d $CACHED_RBENV_ROOT/plugins/ruby-build/.git ] && (
+  ( cd $CACHED_RBENV_ROOT/plugins/ruby-build && git pull ) || rm -fr $CACHED_RBENV_ROOT
 )
 
 # Clone a new ruby-build if there isn't already one cached
-[ -d $CACHED_RBENV/plugins/ruby-build/.git ] || (
-  [ -d $CACHED_RBENV/plugins/ruby-build/.git ] && rm -fr $CACHED_RBENV/plugins/ruby-build/.git
+[ -d $CACHED_RBENV_ROOT/plugins/ruby-build/.git ] || (
+  [ -d $CACHED_RBENV_ROOT/plugins/ruby-build/.git ] && rm -fr $CACHED_RBENV_ROOT/plugins/ruby-build/.git
   [ -d $RBENV_ROOT/plugins/ruby-build ] || git clone https://github.com/sstephenson/ruby-build.git $RBENV_ROOT/plugins/ruby-build
 )
 
 # Restore any cached rbenv (this will include ruby-build)
-[ -d $CACHED_RBENV ] && (
-  cp -fa $CACHED_RBENV $RBENV_ROOT
+[ -d $CACHED_RBENV_ROOT ] && (
+  cp -fa $CACHED_RBENV_ROOT $RBENV_ROOT
 )
 
-PROFILE_DIR=$APP_DIR/.profile.d
+PROFILE_ROOT=$APP_DIR/.profile.d
+BUILD_PROFILE_ROOT=$BUILD_DIR/.profile.d
 
 # Generate the bash profile to source
-mkdir -p $PROFILE_DIR
-RBENV_PROFILE=$PROFILE_DIR/rbenv
+mkdir -p $PROFILE_ROOT
+RBENV_PROFILE=$PROFILE_ROOT/rbenv
 echo 'export APP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.."' >> $RBENV_PROFILE
 echo 'export RBENV_ROOT="$APP_DIR/.rbenv"' >> $RBENV_PROFILE
 echo 'export PATH="$RBENV_ROOT/bin:$PATH"' >> $RBENV_PROFILE
@@ -105,15 +107,16 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
     "
 
     # Make a backup copy in the cache for this ruby version for next time
-    mkdir -p $CACHED_RBENV/versions
-    cp -fa $RBENV_ROOT/versions/$ruby_version $CACHED_RBENV/versions/$ruby_version
+    mkdir -p $CACHED_RBENV_ROOT/versions
+    cp -fa $RBENV_ROOT/versions/$ruby_version $CACHED_RBENV_ROOT/versions/$ruby_version
   )
 
 done
 
 # Overlay the built rbenv back overtop the $BUILD_DIR so it is persisted in the resultant slug
 mkdir -p $BUILD_DIR
-cp -fa $APP_DIR $BUILD_DIR
+cp -fa $RBENV_ROOT $BUILD_RBENV_ROOT
+cp -fa $PROFILE_ROOT $BUILD_PROFILE_ROOT
 
 # Source the rbenv environment
 rbenv rehash
