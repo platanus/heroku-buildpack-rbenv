@@ -92,12 +92,12 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
       cd $APP_DIR
 
       # Ensure rubygems is updated to the latest
-      gem install rubygems-update
+      gem install rubygems-update --no-ri --no-rdoc
       rbenv rehash
       update_rubygems || true
 
       # Install Bundler
-      gem install bundler
+      gem install bundler --no-ri --no-rdoc
     "
 
     # Make a backup copy in the cache for this ruby version for next time
