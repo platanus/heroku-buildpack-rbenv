@@ -19,7 +19,7 @@ RBENV_ROOT=$APP_DIR/.rbenv
 PROFILE_DIR=$APP_DIR/.profile.d
 
 # If REMOVE_RBENV_CACHE is set, clean up the cache
-[ -n $REMOVE_RBENV_CACHE ] && [ -d $CACHED_RBENV ] && rm -fr $CACHED_RBENV
+[ -n "$REMOVE_RBENV_CACHE" ] && [ -d $CACHED_RBENV ] && rm -fr $CACHED_RBENV
 
 # Restore any cached rbenv
 [ -d $CACHED_RBENV ] && (
