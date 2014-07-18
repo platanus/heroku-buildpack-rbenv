@@ -2,13 +2,25 @@
 
 set -e
 
-BUILD_DIR=$1 # The app directory, usually /app
-CACHE_DIR=$2 # The contents of CACHE_DIR will be persisted between builds. 
+BUILD_DIR=$1 # The app directory, usually /app. This will have the app source initially. Whatever is left here will be persisted.
+CACHE_DIR=$2 # The contents of CACHE_DIR will be persisted between builds so we can use it to speed the builds up
 ENV_DIR=$3     # An envdir directory of the app's environment variables
 
-RBENV_ROOT=$BUILD_DIR/.rbenv
 CACHED_RBENV=$CACHE_DIR/rbenv
 
+APP_DIR=/app
+
+# In order for rbenv to run correctly, we need to build it from with the path it will be running from
+[ -d /app ] || (
+  cp -a $BUILD_DIR/ $APP_DIR/
+)
+
+mkdir -p $APP_DIR
+
+RBENV_ROOT=$APP_DIR/.rbenv
+PROFILE_DIR=$APP_DIR/.profile.d
+
+## This oddly causes problems: not quite sure that I'm using the environment variables correctly, might need to be from $ENV_DIR instead
 #[ -n $REMOVE_RBENV_CACHE ] && [ -d $CACHED_RBENV ] && rm -fr $CACHED_RBENV
 
 # Restore any cached rbenv
@@ -33,27 +45,27 @@ CACHED_RBENV=$CACHE_DIR/rbenv
 )
 
 # Generate the bash profile to source
-RBENV_PROFILE=$BUILD_DIR/.profile.d/rbenv
-mkdir -p $BUILD_DIR/.profile.d
-echo 'grep -r . /app/.profile.d || true' >> $RBENV_PROFILE
-echo 'set -x' >> $RBENV_PROFILE
-echo 'env | cut -c1-40' >> $RBENV_PROFILE
+mkdir -p $PROFILE_DIR
+RBENV_PROFILE=$PROFILE_DIR/rbenv
 echo 'export APP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.."' >> $RBENV_PROFILE
 echo 'export RBENV_ROOT="$APP_DIR/.rbenv"' >> $RBENV_PROFILE
 echo 'export PATH="$RBENV_ROOT/bin:$PATH"' >> $RBENV_PROFILE
 echo 'eval "$(rbenv init -)"' >> $RBENV_PROFILE
-echo 'sleep 300' >> $RBENV_PROFILE
 
+# Source the rbenv profile to prepare rbenv to run
 source $RBENV_PROFILE
 
-ruby_version_from_dotfile=$( ( [ -f $BUILD_DIR/.ruby-version ] && cat $BUILD_DIR/.ruby-version ) || true )
-ruby_version_from_gemfile=$( grep -e '^ruby ' $BUILD_DIR/Gemfile | sed -e 's/^ruby //' -e 's/"//g' || true)
+# Identify the ruby versions this app may need to run
+ruby_version_from_dotfile=$( ( [ -f $APP_DIR/.ruby-version ] && cat $APP_DIR/.ruby-version ) || true )
+ruby_version_from_gemfile=$( grep -e '^ruby ' $APP_DIR/Gemfile | sed -e 's/^ruby //' -e 's/"//g' || true)
 
+# Iterate through each ruby version, building it if neccessary
 for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; do
 
   # Generate the ruby version if it doesn't exist yet in the cache
   [ -d $RBENV_ROOT/versions/${ruby_version} ] || (
 
+    # Prepare the build environment by updating ubuntu first. Use caching between builds to improve the speed.
     grep old-releases /etc/apt/sources.list >/dev/null 2>&1 || (
       perl -pi -e "s%archive.ubuntu.com/ubuntu%old-releases.ubuntu.com/ubuntu%g" /etc/apt/sources.list
       APT_CACHE_PATH=$CACHE_DIR/apt
@@ -63,6 +75,8 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
       LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get -o dir::cache::archives=$APT_CACHE_PATH install autoconf bison build-essential libssl-dev zlib1g zlib1g-dev -f -y
     )
 
+    # Use ruby-build to build the ruby version. Use caching to improve build speed.
+
     RUBY_BUILD_CACHE_PATH=$CACHE_DIR/ruby-build.cache
     mkdir -p $RUBY_BUILD_CACHE_PATH
 
@@ -71,10 +85,11 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
 
     rbenv install --keep ${ruby_version}
 
+    # Test out the new ruby, updating rubygems and installing bundler along the way
     bash -c "
       source $RBENV_PROFILE
       rbenv rehash
-      cd $BUILD_DIR
+      cd $APP_DIR
 
       # Ensure rubygems is updated to the latest
       gem install rubygems-update
@@ -91,6 +106,12 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
 
 done
 
+# Overlay the built rbenv back overtop the $BUILD_DIR so it is persisted in the resultant slug
+tar -cf - -C $APP_DIR | tar xf - -C $BUILD_DIR 
+
+# Source the rbenv environment
 rbenv rehash
-cd $BUILD_DIR
+cd $APP_DIR
+
+# Export the resultant rbenv environment variables for later buildpacks to inherit
 export PATH RBENV_ROOT
