@@ -41,12 +41,10 @@ echo 'eval "$(rbenv init -)"' >> $RBENV_PROFILE
 
 source $RBENV_PROFILE
 
-
 ruby_version_from_dotfile="$([ -f $BUILD_DIR/.ruby-version ] && cat $BUILD_DIR/.ruby-version)"
 ruby_version_from_gemfile="$(grep -e '^ruby ' $BUILD_DIR/Gemfile | sed -e 's/^ruby //' -e 's/"//g')" || true
-ruby_versions="$(echo $ruby_version_from_dotfile $ruby_version_from_gemfile)"
 
-for ruby_version in $ruby_versions ; do
+for ruby_version in $ruby_version_from_dotfile $ruby_version_from_gemfile ; do
 
   # Generate the ruby version if it doesn't exist yet in the cache
   [ -n $REBUILD_RUBY ] ||
