@@ -28,7 +28,7 @@ CACHED_RBENV=$CACHE_DIR/rbenv
 
   # Cache the newly cloned rbenv
   [ -d $CACHE_DIR/.rbenv ] || cp -a $RBENV_ROOT $CACHED_RBENV
-]
+)
 
 # Generate the bash profile to source
 RBENV_PROFILE=$BUILD_DIR/.profile.d/rbenv
