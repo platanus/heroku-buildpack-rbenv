@@ -10,9 +10,6 @@ CACHED_RBENV=$CACHE_DIR/rbenv
 
 APP_DIR=/app
 
-ls -lsR $BUILD_DIR
-ls -lsR $APP_DIR
-
 [ "$BUILD_DIR" = "$APP_DIR" ] || (
   cp -fa $BUILD_DIR $APP_DIR
 )
