@@ -1,6 +1,6 @@
 !/usr/bin/env bash
 
-set -e
+set -ex
 
 BUILD_DIR=$1 # The app directory, usually /app. This will have the app source initially. Whatever is left here will be persisted.
 CACHE_DIR=$2 # The contents of CACHE_DIR will be persisted between builds so we can use it to speed the builds up
