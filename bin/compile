@@ -35,7 +35,7 @@ CACHED_RBENV=$CACHE_DIR/rbenv
 # Generate the bash profile to source
 RBENV_PROFILE=$BUILD_DIR/.profile.d/rbenv
 mkdir -p $BUILD_DIR/.profile.d
-echo 'grep . /app/.profile.d/*' >> $RBENV_PROFILE
+echo 'grep -r . /app/.profile.d || true' >> $RBENV_PROFILE
 echo 'env' >> $RBENV_PROFILE
 echo 'set -x' >> $RBENV_PROFILE
 echo 'export APP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.."' >> $RBENV_PROFILE
