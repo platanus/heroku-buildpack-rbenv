@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
  
-set -ex
+set -e
 
 BUILD_DIR=$1 # The app directory, usually /app. This will have the app source initially. Whatever is left here will be persisted.
 CACHE_DIR=$2 # The contents of CACHE_DIR will be persisted between builds so we can use it to speed the builds up
@@ -56,7 +56,6 @@ BUILD_PROFILE_ROOT=$BUILD_DIR/.profile.d
 # Generate the bash profile to source
 mkdir -p $PROFILE_ROOT
 RBENV_PROFILE=$PROFILE_ROOT/rbenv
-echo 'set -x' >> $RBENV_PROFILE
 echo 'export APP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.."' >> $RBENV_PROFILE
 echo 'export RBENV_ROOT="$APP_DIR/.rbenv"' >> $RBENV_PROFILE
 echo 'export PATH="$RBENV_ROOT/bin:$PATH"' >> $RBENV_PROFILE
