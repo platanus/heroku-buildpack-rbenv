@@ -125,7 +125,8 @@ done
 mkdir -p $BUILD_DIR
 echo "Copying files to the slug build directory"
 cp -fa $RBENV_ROOT $BUILD_RBENV_ROOT
-cp -fa $PROFILE_ROOT $BUILD_PROFILE_ROOT
+mkdir -p $BUILD_PROFILE_ROOT
+cp -fa $PROFILE_ROOT/* $BUILD_PROFILE_ROOT/
 
 # Source the rbenv environment
 rbenv rehash
