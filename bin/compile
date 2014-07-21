@@ -10,43 +10,45 @@ CACHED_RBENV_ROOT=$CACHE_DIR/rbenv
 
 APP_DIR=/app
 
-[ "$BUILD_DIR" = "$APP_DIR" ] || (
-  cp -fa $BUILD_DIR $APP_DIR
-)
+[ "$BUILD_DIR" = "$APP_DIR" ] || cp -fa $BUILD_DIR $APP_DIR
 mkdir -p $APP_DIR
 
 RBENV_ROOT=$APP_DIR/.rbenv
 BUILD_RBENV_ROOT=$BUILD_DIR/.rbenv
 
 # If REMOVE_RBENV_CACHE is set, clean up the cache
+[ -n "$REMOVE_RBENV_CACHE" ] && [ -d $CACHED_RBENV_ROOT ] && echo "Removing cached copy of RBENV"
 [ -n "$REMOVE_RBENV_CACHE" ] && [ -d $CACHED_RBENV_ROOT ] && rm -fr $CACHED_RBENV_ROOT
 
 # Update any cached rbenv, remove the cache if there is an error
 [ -d $CACHED_RBENV_ROOT/.git ] && (
-  ( cd $CACHED_RBENV_ROOT; git pull ) || ( rm -fr $CACHED_RBENV_ROOT )
+  echo "Found existing cached copy of rbenv"
+  ( cd $CACHED_RBENV_ROOT; git pull ) || rm -fr $CACHED_RBENV_ROOT
 )
 
 # Clone a new rbenv if there isn't already one cached
 [ -d $CACHED_RBENV_ROOT/.git ] || (
+  echo "Cloning a fresh copy of rbenv to cache"
   [ -d $CACHED_RBENV_ROOT ] && rm -fr $CACHED_RBENV_ROOT
   [ -d $RBENV_ROOT ] || git clone https://github.com/sstephenson/rbenv.git $CACHED_RBENV_ROOT
 )
 
 # Update any cached ruby-build, remove the cache if there is an error
 [ -d $CACHED_RBENV_ROOT/plugins/ruby-build/.git ] && (
+  echo "Found existing cached copy of ruby-build"
   ( cd $CACHED_RBENV_ROOT/plugins/ruby-build && git pull ) || rm -fr $CACHED_RBENV_ROOT
 )
 
 # Clone a new ruby-build if there isn't already one cached
 [ -d $CACHED_RBENV_ROOT/plugins/ruby-build/.git ] || (
+  echo "Cloning a fresh copy of ruby-build to cache"
   [ -d $CACHED_RBENV_ROOT/plugins/ruby-build/.git ] && rm -fr $CACHED_RBENV_ROOT/plugins/ruby-build/.git
   [ -d $RBENV_ROOT/plugins/ruby-build ] || git clone https://github.com/sstephenson/ruby-build.git $RBENV_ROOT/plugins/ruby-build
 )
 
 # Restore any cached rbenv (this will include ruby-build)
-[ -d $CACHED_RBENV_ROOT ] && (
-  cp -fa $CACHED_RBENV_ROOT $RBENV_ROOT
-)
+[ -d $CACHED_RBENV_ROOT ] && echo "Copying cached copy of rbenv"
+[ -d $CACHED_RBENV_ROOT ] && cp -fa $CACHED_RBENV_ROOT $RBENV_ROOT
 
 PROFILE_ROOT=$APP_DIR/.profile.d
 BUILD_PROFILE_ROOT=$BUILD_DIR/.profile.d
@@ -58,8 +60,8 @@ echo 'set -x' >> $RBENV_PROFILE
 echo 'export APP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.."' >> $RBENV_PROFILE
 echo 'export RBENV_ROOT="$APP_DIR/.rbenv"' >> $RBENV_PROFILE
 echo 'export PATH="$RBENV_ROOT/bin:$PATH"' >> $RBENV_PROFILE
-echo 'ls -lsR /app/.rbenv' >> $RBENV_PROFILE
 echo 'hash -r' >> $RBENV_PROFILE
+echo '[ -f $RBENV_ROOT/bin/rbenv ]' >> $RBENV_PROFILE
 echo 'eval "$(rbenv init -)"' >> $RBENV_PROFILE
 
 # Source the rbenv profile to prepare rbenv to run
@@ -72,8 +74,11 @@ ruby_version_from_gemfile=$( grep -e '^ruby ' $APP_DIR/Gemfile | sed -e 's/^ruby
 # Iterate through each ruby version, building it if neccessary
 for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; do
 
+  echo "Checking for existence of rbenv ruby ${ruby_version}"
+
   # Generate the ruby version if it doesn't exist yet in the cache
   [ -d $RBENV_ROOT/versions/${ruby_version} ] || (
+    echo "Could not find rbenv ruby ${ruby_version}, building"
 
     # Prepare the build environment by updating ubuntu first. Use caching between builds to improve the speed.
     grep old-releases /etc/apt/sources.list >/dev/null 2>&1 || (
@@ -111,6 +116,7 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
 
     # Make a backup copy in the cache for this ruby version for next time
     mkdir -p $CACHED_RBENV_ROOT/versions
+    echo "Creating cached copy of ruby $ruby_version"
     cp -fa $RBENV_ROOT/versions/$ruby_version $CACHED_RBENV_ROOT/versions/$ruby_version
   )
 
@@ -118,6 +124,7 @@ done
 
 # Overlay the built rbenv back overtop the $BUILD_DIR so it is persisted in the resultant slug
 mkdir -p $BUILD_DIR
+echo "Copying files to the slug build directory"
 cp -fa $RBENV_ROOT $BUILD_RBENV_ROOT
 cp -fa $PROFILE_ROOT $BUILD_PROFILE_ROOT
 
