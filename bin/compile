@@ -30,7 +30,7 @@ BUILD_RBENV_ROOT=$BUILD_DIR/.rbenv
 [ -d $CACHED_RBENV_ROOT/.git ] || (
   echo "Cloning a fresh copy of rbenv to cache"
   [ -d $CACHED_RBENV_ROOT ] && rm -fr $CACHED_RBENV_ROOT
-  [ -d $RBENV_ROOT ] || git clone https://github.com/sstephenson/rbenv.git $CACHED_RBENV_ROOT
+  [ -d $CACHED_RBENV_ROOT ] || git clone https://github.com/sstephenson/rbenv.git $CACHED_RBENV_ROOT
 )
 
 # Update any cached ruby-build, remove the cache if there is an error
@@ -43,7 +43,7 @@ BUILD_RBENV_ROOT=$BUILD_DIR/.rbenv
 [ -d $CACHED_RBENV_ROOT/plugins/ruby-build/.git ] || (
   echo "Cloning a fresh copy of ruby-build to cache"
   [ -d $CACHED_RBENV_ROOT/plugins/ruby-build/.git ] && rm -fr $CACHED_RBENV_ROOT/plugins/ruby-build/.git
-  [ -d $RBENV_ROOT/plugins/ruby-build ] || git clone https://github.com/sstephenson/ruby-build.git $RBENV_ROOT/plugins/ruby-build
+  [ -d $CACHED_RBENV_ROOT/plugins/ruby-build ] || git clone https://github.com/sstephenson/ruby-build.git $CACHED_RBENV_ROOT/plugins/ruby-build
 )
 
 # Restore any cached rbenv (this will include ruby-build)
