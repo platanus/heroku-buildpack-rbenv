@@ -68,7 +68,7 @@ source $RBENV_PROFILE
 
 # Identify the ruby versions this app may need to run
 ruby_version_from_dotfile=$( ( [ -f $APP_DIR/.ruby-version ] && cat $APP_DIR/.ruby-version ) || true )
-ruby_version_from_gemfile=$( grep -e '^ruby ' $APP_DIR/Gemfile | sed -e 's/^ruby //' -e 's/"//g' || true)
+ruby_version_from_gemfile=$( grep -e '^ruby ' $APP_DIR/Gemfile | sed -e 's/^ruby //' -e 's/[\'"'"'\"]//g' || true)
 
 # Iterate through each ruby version, building it if neccessary
 for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; do
