@@ -77,6 +77,8 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
 
   # Generate the ruby version if it doesn't exist yet in the cache
   [ -d $RBENV_ROOT/versions/${ruby_version} ] || (
+    rbenv install --list
+
     echo "Could not find rbenv ruby ${ruby_version}, building"
 
     # Prepare the build environment by updating ubuntu first. Use caching between builds to improve the speed.
