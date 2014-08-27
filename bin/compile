@@ -6,9 +6,6 @@ BUILD_DIR=$1 # The app directory, usually /app. This will have the app source in
 CACHE_DIR=$2 # The contents of CACHE_DIR will be persisted between builds so we can use it to speed the builds up
 ENV_DIR=$3     # An envdir directory of the app's environment variables
 
-echo "List of the contents of $CACHE_DIR"
-ls -la $CACHE_DIR
-
 CACHED_RBENV_ROOT=$CACHE_DIR/rbenv
 
 APP_DIR=/app
@@ -80,8 +77,6 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
 
   # Generate the ruby version if it doesn't exist yet in the cache
   [ -d $RBENV_ROOT/versions/${ruby_version} ] || (
-    rbenv install --list
-
     echo "Could not find rbenv ruby ${ruby_version}, building"
 
     # Prepare the build environment by updating ubuntu first. Use caching between builds to improve the speed.
