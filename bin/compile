@@ -80,9 +80,12 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
     echo "Could not find rbenv ruby ${ruby_version}, building"
 
     # Prepare the build environment by updating ubuntu first. Use caching between builds to improve the speed.
-    grep old-releases /etc/apt/sources.list >/dev/null 2>&1 || (
+    grep old-releases /etc/apt/sources.list || (
       if ! grep -qe 'utopic\|trusty\|saucy\|precise\|lucid' /etc/apt/sources.list ; then
         perl -pi -e "s%archive.ubuntu.com/ubuntu%old-releases.ubuntu.com/ubuntu%g" /etc/apt/sources.list
+      fi
+      if ! grep -qe '^deb-src' /etc/apt/sources.list ; then
+        sed -e 's/^deb /deb-src /g' < /etc/apt/sources.list >> /etc/apt/sources.list
       fi
       APT_CACHE_PATH=$CACHE_DIR/apt
       mkdir -p $APT_CACHE_PATH
