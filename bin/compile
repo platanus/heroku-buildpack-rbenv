@@ -108,7 +108,7 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
     #  export RUBY_CONFIGURE_OPTS=--with-readline-dir="/usr/lib/x86_64-linux-gnu/libreadline.so"
     #fi
     (
-      if echo ${ruby_version} | grep -qe '^2\.1\.' ; then
+      if echo ${ruby_version} | grep -qe '^2.1.0\|^2.1.1' ; then
         curl -fsSL https://gist.github.com/mislav/a18b9d7f0dc5b9efc162.txt
       else
         yes
