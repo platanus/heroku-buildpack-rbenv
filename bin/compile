@@ -102,19 +102,19 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
     mkdir -p $RUBY_BUILD_BUILD_PATH
 
     if [ -f "/usr/lib/libreadline.so" ]; then
-      export RUBY_CONFIGURE_OPTS=--with-readline-dir="/usr/lib/libreadline.so"
+      RUBY_CONFIGURE_OPTS=--with-readline-dir="/usr/lib/libreadline.so"
     fi
     if [ -f "/usr/lib/x86_64-linux-gnu/libreadline.so" ]; then
-      export RUBY_CONFIGURE_OPTS=--with-readline-dir="/usr/lib/x86_64-linux-gnu/libreadline.so"
+      RUBY_CONFIGURE_OPTS=--with-readline-dir="/usr/lib/x86_64-linux-gnu/libreadline.so"
     fi
-    export CONFIGURE_OPTS="--disable-install-doc --with-readline=/usr/include/readline"
+    CONFIGURE_OPTS="--disable-install-doc --with-readline=/usr/include/readline"
     (
       if echo ${ruby_version} | grep -qe '^2.1.0\|^2.1.1' ; then
         curl -fsSL https://gist.github.com/mislav/a18b9d7f0dc5b9efc162.txt
       else
         cat -
       fi
-    ) | rbenv install --keep --patch ${ruby_version}
+      ) | env RUBY_CONFIGURE_OPTS="${RUBY_CONFIGURE_OPTS}" CONFIGURE_OPTS="${CONFIGURE_OPTS}" rbenv install --keep --patch ${ruby_version}
 
     # Test out the new ruby, updating rubygems and installing bundler along the way
     bash -c "
