@@ -122,10 +122,12 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
       rbenv rehash
       cd $APP_DIR
 
-      # Ensure rubygems is updated to the latest
-      gem install rubygems-update --no-ri --no-rdoc
+      gem update --system
+
+      ## Ensure rubygems is updated to the latest
+      #gem install rubygems-update --no-ri --no-rdoc
       rbenv rehash
-      update_rubygems || true
+      #update_rubygems || true
 
       # Install Bundler
       gem install bundler --no-ri --no-rdoc
