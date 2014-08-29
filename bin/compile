@@ -133,6 +133,7 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
 
       # Install Bundler
       gem install bundler --no-ri --no-rdoc
+      rbenv rehash
 
       cd $APP_DIR
       bundle install --without test --path vendor/bundle --binstubs vendor/bundle/bin -j4 --deployment
