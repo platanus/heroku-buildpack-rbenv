@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -ex
 
 BUILD_DIR=$1 # The app directory, usually /app. This will have the app source initially. Whatever is left here will be persisted.
 CACHE_DIR=$2 # The contents of CACHE_DIR will be persisted between builds so we can use it to speed the builds up
@@ -114,7 +114,7 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
       else
         cat -
       fi
-      ) | env RUBY_CONFIGURE_OPTS="${RUBY_CONFIGURE_OPTS}" CONFIGURE_OPTS="${CONFIGURE_OPTS}" rbenv install --keep --patch ${ruby_version}
+    ) | env RUBY_CONFIGURE_OPTS="${RUBY_CONFIGURE_OPTS}" CONFIGURE_OPTS="${CONFIGURE_OPTS}" rbenv install --keep --patch ${ruby_version}
 
     # Test out the new ruby, updating rubygems and installing bundler along the way
     bash -c "
@@ -133,6 +133,9 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
 
       # Install Bundler
       gem install bundler --no-ri --no-rdoc
+
+      cd $APP_DIR
+      bundle install --without test --path vendor/bundle --binstubs vendor/bundle/bin -j4 --deployment
     "
 
     # Make a backup copy in the cache for this ruby version for next time
