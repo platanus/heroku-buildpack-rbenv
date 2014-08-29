@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
- 
-set -e
+
+set -ex
 
 BUILD_DIR=$1 # The app directory, usually /app. This will have the app source initially. Whatever is left here will be persisted.
 CACHE_DIR=$2 # The contents of CACHE_DIR will be persisted between builds so we can use it to speed the builds up
@@ -101,13 +101,19 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
     RUBY_BUILD_BUILD_PATH=$CACHE_DIR/ruby-build.sources
     mkdir -p $RUBY_BUILD_BUILD_PATH
 
-    if [ -f "/usr/lib/libreadline.so" ]; then
-      export RUBY_CONFIGURE_OPTS=--with-readline-dir="/usr/lib/libreadline.so" 
-    fi
-    if [ -f "/usr/lib/x86_64-linux-gnu/libreadline.so" ]; then
-      export RUBY_CONFIGURE_OPTS=--with-readline-dir="/usr/lib/x86_64-linux-gnu/libreadline.so" 
-    fi
-    rbenv install --keep ${ruby_version}
+    #if [ -f "/usr/lib/libreadline.so" ]; then
+    #  export RUBY_CONFIGURE_OPTS=--with-readline-dir="/usr/lib/libreadline.so"
+    #fi
+    #if [ -f "/usr/lib/x86_64-linux-gnu/libreadline.so" ]; then
+    #  export RUBY_CONFIGURE_OPTS=--with-readline-dir="/usr/lib/x86_64-linux-gnu/libreadline.so"
+    #fi
+    (
+      if echo ${ruby_version} | grep -qe '^2\.1\.' ; then
+        curl -fsSL https://gist.github.com/mislav/a18b9d7f0dc5b9efc162.txt
+      else
+        yes
+      fi
+    ) | rbenv install --keep --patch ${ruby_version}
 
     # Test out the new ruby, updating rubygems and installing bundler along the way
     bash -c "
