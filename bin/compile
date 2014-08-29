@@ -122,7 +122,9 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
       rbenv rehash
       cd $APP_DIR
 
+      echo 'Upgrading rubygems from: '`gem --version`
       gem update --system --no-ri --no-rdoc
+      echo 'Upgraded rubygems to: '`gem --version`
 
       ## Ensure rubygems is updated to the latest
       #gem install rubygems-update --no-ri --no-rdoc
