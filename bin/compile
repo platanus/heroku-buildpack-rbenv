@@ -90,9 +90,7 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
       APT_CACHE_PATH=$CACHE_DIR/apt
       mkdir -p $APT_CACHE_PATH
       apt-get -o dir::cache::archives=$APT_CACHE_PATH update
-      LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get -o dir::cache::archives=$APT_CACHE_PATH install autoconf bison build-essential libssl-dev zlib1g zlib1g-dev -f -y
-      LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get -o dir::cache::archives=$APT_CACHE_PATH install libreadline5-dev > /dev/null 2>&1 || true
-      LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get -o dir::cache::archives=$APT_CACHE_PATH install libreadline6-dev > /dev/null 2>&1 || true
+      LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get -o dir::cache::archives=$APT_CACHE_PATH install autoconf bison build-essential libssl-dev zlib1g zlib1g-dev libreadline-dev libncurses-dev -f -y 
     )
 
     # Use ruby-build to build the ruby version. Use caching to improve build speed.
