@@ -111,7 +111,7 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
       if echo ${ruby_version} | grep -qe '^2.1.0\|^2.1.1' ; then
         curl -fsSL https://gist.github.com/mislav/a18b9d7f0dc5b9efc162.txt
       else
-        yes
+        cat -
       fi
     ) | rbenv install --keep --patch ${ruby_version}
 
