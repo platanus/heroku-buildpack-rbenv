@@ -88,6 +88,8 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
       mkdir -p $APT_CACHE_PATH
       apt-get -o dir::cache::archives=$APT_CACHE_PATH update
       LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get -o dir::cache::archives=$APT_CACHE_PATH install autoconf bison build-essential libssl-dev zlib1g zlib1g-dev -f -y
+      LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get -o dir::cache::archives=$APT_CACHE_PATH install libreadline5-dev > /dev/null 2>&1 || true
+      LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get -o dir::cache::archives=$APT_CACHE_PATH install libreadline6-dev > /dev/null 2>&1 || true
     )
 
     # Use ruby-build to build the ruby version. Use caching to improve build speed.
@@ -98,7 +100,7 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
     RUBY_BUILD_BUILD_PATH=$CACHE_DIR/ruby-build.sources
     mkdir -p $RUBY_BUILD_BUILD_PATH
 
-    rbenv install --keep ${ruby_version}
+    CONFIGURE_OPTS="--with-readline-dir=/usr/include/readline" rbenv install --keep ${ruby_version}
 
     # Test out the new ruby, updating rubygems and installing bundler along the way
     bash -c "
