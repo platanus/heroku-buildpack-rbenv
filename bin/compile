@@ -101,7 +101,13 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
     RUBY_BUILD_BUILD_PATH=$CACHE_DIR/ruby-build.sources
     mkdir -p $RUBY_BUILD_BUILD_PATH
 
-    CONFIGURE_OPTS="--with-readline-dir=/usr/include/readline" rbenv install --keep ${ruby_version}
+    if [ -f "/usr/lib/libreadline.so" ]; then
+      export RUBY_CONFIGURE_OPTS=--with-readline-dir="/usr/lib/libreadline.so" 
+    fi
+    if [ -f "/usr/lib/x86_64-linux-gnu/libreadline.so" ]; then
+      export RUBY_CONFIGURE_OPTS=--with-readline-dir="/usr/lib/x86_64-linux-gnu/libreadline.so" 
+    fi
+    rbenv install --keep ${ruby_version}
 
     # Test out the new ruby, updating rubygems and installing bundler along the way
     bash -c "
