@@ -118,38 +118,37 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
 
     cat <<EOF > ~/.gemrc
 ---
-:backtrace: true
-:benchmark: false
-:bulk_threshold: 1000
+:backtrace: ${RBENV_GEMRC_BACKTRACE:-true}
+:benchmark: ${RBENV_GEMRC_jBENCHMARK:-false}
+:bulk_threshold: ${RBENV_GEMRC_THRESHOLD:-1000}
 :sources:
-- http://rubygems.org/
-- http://rubygems.org
-- https://rubygems.org
-:update_sources: true
-:verbose: true
-:gem: --no-ri --no-rdoc
+- ${RBENV_GEMRC_SOURCE:-https://rubygems.org}
+:update_sources: ${RBENV_GEMRC_UPDATE_SOURCES:-true}
+:verbose: ${RBENV_GEMRC_VERBOSE:-true}
+:gem: ${RBENV_GEMRC_GEM:---no-ri --no-rdoc}
 EOF
+    echo GEMRC:
+    cat ~/.gemrc
 
     # Test out the new ruby, updating rubygems and installing bundler along the way
     bash -c "
+      echo 'Upgrading system rubygems from: '`gem --version`
+      REALLY_GEM_UPDATE_SYSTEM=true gem update --system --no-ri --no-rdoc
+      echo 'Upgraded system rubygems to: '`gem --version`
       source $RBENV_PROFILE
       rbenv rehash
       cd $APP_DIR
-
-      echo 'Upgrading rubygems from: '`gem --version`
-      gem update --system --no-ri --no-rdoc
-      echo 'Upgraded rubygems to: '`gem --version`
-
-      ## Ensure rubygems is updated to the latest
+      echo 'Upgrading rbenv rubygems from: '`gem --version`
+      REALLY_GEM_UPDATE_SYSTEM=true gem update --system --no-ri --no-rdoc
+      echo 'Upgraded rbenv rubygems to: '`gem --version`
       gem install rubygems-update --no-ri --no-rdoc
+      echo 'Running rubygems-update: '`gem --version`
       rbenv rehash
       update_rubygems || true
-
       rbenv rehash
-      # Install Bundler
+      echo 'Ran rubygems-update: '`gem --version`
       gem install bundler --no-ri --no-rdoc
       rbenv rehash
-
       bundle install --without test --path vendor/bundle --binstubs vendor/bundle/bin -j4 --deployment
     "
 
@@ -174,7 +173,7 @@ cp -fa $PROFILE_ROOT/* $BUILD_PROFILE_ROOT/
 
 if [ -d $CACHE_DIR/bundle ]; then
   mkdir -p $BUILD_DIR/vendor/bundle
-  cp -fa $CACHE_DIR/bundle/ $BUILD_DIR/vendor/bundle/
+  [ -n "${RBENV_SKIP_BUNDLE}" ] || cp -fa $CACHE_DIR/bundle/ $BUILD_DIR/vendor/bundle/
 fi
 
 # Source the rbenv environment
