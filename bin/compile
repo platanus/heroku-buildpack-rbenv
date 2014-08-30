@@ -127,17 +127,21 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
       echo 'Upgraded rubygems to: '`gem --version`
 
       ## Ensure rubygems is updated to the latest
-      #gem install rubygems-update --no-ri --no-rdoc
+      gem install rubygems-update --no-ri --no-rdoc
       rbenv rehash
-      #update_rubygems || true
+      update_rubygems || true
 
+      rbenv rehash
       # Install Bundler
       gem install bundler --no-ri --no-rdoc
       rbenv rehash
 
-      cd $APP_DIR
       bundle install --without test --path vendor/bundle --binstubs vendor/bundle/bin -j4 --deployment
     "
+
+    echo "Creating cached copy of bundled vendor gems"
+    mkdir -p $CACHE_DIR/bundle
+    cp -fa $APP_DIR/vendor/bundle $CACHE_DIR/bundle
 
     # Make a backup copy in the cache for this ruby version for next time
     mkdir -p $CACHED_RBENV_ROOT/versions
@@ -153,6 +157,11 @@ echo "Copying files to the slug build directory"
 cp -fa $RBENV_ROOT $BUILD_RBENV_ROOT
 mkdir -p $BUILD_PROFILE_ROOT
 cp -fa $PROFILE_ROOT/* $BUILD_PROFILE_ROOT/
+
+if [ -d $CACHE_DIR/bundle ]; then
+  mkdir -p $BUILD_DIR/vendor/bundle
+  cp -fa $CACHE_DIR/bundle/ $BUILD_DIR/vendor/bundle/
+fi
 
 # Source the rbenv environment
 rbenv rehash
