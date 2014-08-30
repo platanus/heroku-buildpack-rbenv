@@ -6,10 +6,6 @@ BUILD_DIR=$1 # The app directory, usually /app. This will have the app source in
 CACHE_DIR=$2 # The contents of CACHE_DIR will be persisted between builds so we can use it to speed the builds up
 ENV_DIR=$3     # An envdir directory of the app's environment variables
 
-echo BUILD_DIR="$BUILD_DIR"
-echo CACHE_DIR="$CACHE_DIR"
-echo ENV_DIR="$ENV_DIR"
-
 CACHED_RBENV_ROOT=$CACHE_DIR/rbenv
 
 APP_DIR=/app
