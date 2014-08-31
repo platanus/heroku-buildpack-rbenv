@@ -90,7 +90,7 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
       APT_CACHE_PATH=$CACHE_DIR/apt
       mkdir -p $APT_CACHE_PATH
       apt-get -o dir::cache::archives=$APT_CACHE_PATH update
-      LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get -o dir::cache::archives=$APT_CACHE_PATH install autoconf bison build-essential libssl-dev zlib1g zlib1g-dev libreadline-dev libncurses-dev -f -y 
+      LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get -o dir::cache::archives=$APT_CACHE_PATH install autoconf bison build-essential libssl-dev zlib1g zlib1g-dev libreadline-dev libncurses-dev -f -y libssl-dev patchutils
     )
 
     # Use ruby-build to build the ruby version. Use caching to improve build speed.
@@ -107,12 +107,12 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
     if [ -f "/usr/lib/x86_64-linux-gnu/libreadline.so" ]; then
       RUBY_CONFIGURE_OPTS=--with-readline-dir="/usr/lib/x86_64-linux-gnu/libreadline.so"
     fi
-    CONFIGURE_OPTS="--disable-install-doc --with-readline=/usr/include/readline"
+    CONFIGURE_OPTS="--disable-install-doc --with-readline=/usr/include/readline --with-openssl-dir=/usr/include/readline"
     (
-      if echo ${ruby_version} | grep -qe '^2.1.0\|^2.1.1' ; then
+      if echo ${ruby_version} | grep -qe '^2.1.[012]' ; then
         curl -fsSL https://gist.github.com/mislav/a18b9d7f0dc5b9efc162.txt
       else
-        cat -
+        echo ""
       fi
     ) | env RUBY_CONFIGURE_OPTS="${RUBY_CONFIGURE_OPTS}" CONFIGURE_OPTS="${CONFIGURE_OPTS}" rbenv install --keep --patch ${ruby_version}
 
