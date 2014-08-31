@@ -122,7 +122,7 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
 :benchmark: ${RBENV_GEMRC_jBENCHMARK:-false}
 :bulk_threshold: ${RBENV_GEMRC_THRESHOLD:-1000}
 :sources:
-- ${RBENV_GEMRC_SOURCE:-https://rubygems.org}
+- ${RBENV_GEMRC_SOURCE1:-http://rubygems.org}
 :update_sources: ${RBENV_GEMRC_UPDATE_SOURCES:-true}
 :verbose: ${RBENV_GEMRC_VERBOSE:-true}
 :gem: ${RBENV_GEMRC_GEM:---no-ri --no-rdoc}
