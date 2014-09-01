@@ -122,7 +122,7 @@ for ruby_version in ${ruby_version_from_dotfile} ${ruby_version_from_gemfile} ; 
 :benchmark: ${RBENV_GEMRC_jBENCHMARK:-false}
 :bulk_threshold: ${RBENV_GEMRC_THRESHOLD:-1000}
 :sources:
-- ${RBENV_GEMRC_SOURCE1:-http://rubygems.org}
+- ${RBENV_GEMRC_SOURCE:-https://rubygems.org}
 :update_sources: ${RBENV_GEMRC_UPDATE_SOURCES:-true}
 :verbose: ${RBENV_GEMRC_VERBOSE:-true}
 :gem: ${RBENV_GEMRC_GEM:---no-ri --no-rdoc}
@@ -151,8 +151,8 @@ EOF
       echo 'Ran rubygems-update: '`gem --version`
       gem install bundler --no-ri --no-rdoc
       rbenv rehash
-      bundle install --without test --path vendor/bundle --binstubs vendor/bundle/bin -j4 --deployment
     "
+    #bundle install --without test --path vendor/bundle --binstubs vendor/bundle/bin -j4 --deployment
 
     echo "Creating cached copy of bundled vendor gems"
     mkdir -p $CACHE_DIR/bundle
@@ -173,10 +173,10 @@ cp -fa $RBENV_ROOT $BUILD_RBENV_ROOT
 mkdir -p $BUILD_PROFILE_ROOT
 cp -fa $PROFILE_ROOT/* $BUILD_PROFILE_ROOT/
 
-if [ -d $CACHE_DIR/bundle ]; then
-  mkdir -p $BUILD_DIR/vendor/bundle
-  [ -n "${RBENV_SKIP_BUNDLE}" ] || cp -fa $CACHE_DIR/bundle/ $BUILD_DIR/vendor/bundle/
-fi
+#if [ -d $CACHE_DIR/bundle ]; then
+#  mkdir -p $BUILD_DIR/vendor/bundle
+#  [ -n "${RBENV_SKIP_BUNDLE}" ] || cp -fa $CACHE_DIR/bundle/ $BUILD_DIR/vendor/bundle/
+#fi
 
 # Source the rbenv environment
 rbenv rehash
