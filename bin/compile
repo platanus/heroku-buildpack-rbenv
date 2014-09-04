@@ -154,9 +154,9 @@ EOF
     "
     #bundle install --without test --path vendor/bundle --binstubs vendor/bundle/bin -j4 --deployment
 
-    echo "Creating cached copy of bundled vendor gems"
-    mkdir -p $CACHE_DIR/bundle
-    cp -fa $APP_DIR/vendor/bundle $CACHE_DIR/bundle
+    #echo "Creating cached copy of bundled vendor gems"
+    #mkdir -p $CACHE_DIR/bundle
+    #cp -fa $APP_DIR/vendor/bundle $CACHE_DIR/bundle
 
     # Make a backup copy in the cache for this ruby version for next time
     mkdir -p $CACHED_RBENV_ROOT/versions
