@@ -14,7 +14,7 @@ Alternatively, use [dotenv](https://github.com/bkeepers/dotenv) and include ```B
 
 Add this repository to your .buildpacks file:
 
-    https://github.com/ianblenke/heroku-buildpack-rbenv.git
+    https://github.com/CrowdFlower/heroku-buildpack-rbenv.git
     https://github.com/CrowdFlower/heroku-buildpack-ruby.git
 
 # Implementation:
